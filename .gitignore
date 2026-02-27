@@ -31,6 +31,15 @@ yarn-error.log*
 # vercel
 .vercel
 
+# MCP config (contains API keys)
+.mcp.json
+
+# Claude Code session data
+.claude/
+
+# Uploaded files
+/tmp/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
