@@ -16,6 +16,7 @@ const EMPTY_FORM = { email: '', company: '' };
 export default function ContactsManager({ contacts, onChange, profileId }: Props) {
   const [form, setForm] = useState(EMPTY_FORM);
   const [error, setError] = useState('');
+  const [csvMessage, setCsvMessage] = useState('');
   const [saving, setSaving] = useState(false);
 
   async function addContact() {
@@ -81,13 +82,13 @@ export default function ContactsManager({ contacts, onChange, profileId }: Props
       const text = ev.target?.result as string;
       const newContacts = parseCsvToContacts(text);
       if (newContacts.length === 0) {
-        alert('No se encontraron emails válidos. El CSV debe tener una columna "email" o "correo".');
+        setCsvMessage('No se encontraron emails válidos. El CSV debe tener una columna "email" o "correo".');
         return;
       }
       const existing = new Set(contacts.map((c) => c.email));
       const toAdd = newContacts.filter((c) => !existing.has(c.email));
       if (toAdd.length === 0) {
-        alert('Todos los contactos del CSV ya están en la lista');
+        setCsvMessage('Todos los contactos del CSV ya están en la lista.');
         return;
       }
 
@@ -105,9 +106,9 @@ export default function ContactsManager({ contacts, onChange, profileId }: Props
         const saved = await res.json();
         onChange([...contacts, ...saved]);
         const skipped = newContacts.length - toAdd.length;
-        alert(`Importados ${saved.length} contactos${skipped > 0 ? ` (${skipped} duplicados omitidos)` : ''}`);
+        setCsvMessage(`Importados ${saved.length} contactos${skipped > 0 ? ` (${skipped} duplicados omitidos)` : ''}.`);
       } catch (err: unknown) {
-        alert(err instanceof Error ? err.message : 'Error al importar CSV');
+        setCsvMessage(err instanceof Error ? err.message : 'Error al importar CSV');
       } finally {
         setSaving(false);
       }
@@ -185,6 +186,10 @@ export default function ContactsManager({ contacts, onChange, profileId }: Props
           </button>
         )}
       </div>
+
+      {csvMessage && (
+        <p className="text-sm text-blue-700 bg-blue-50 border border-blue-200 rounded-lg px-3 py-2">{csvMessage}</p>
+      )}
 
       {/* Table */}
       {contacts.length === 0 ? (

@@ -33,6 +33,7 @@ export default function SmtpConfig({ config, onSave, onPasswordChange, onFullSav
   const [testMessage, setTestMessage] = useState('');
   const [errors,      setErrors]      = useState<Record<string, string>>({});
   const [saving,      setSaving]      = useState(false);
+  const [saveResult,  setSaveResult]  = useState<'ok' | 'error' | null>(null);
 
   function applyPreset(p: SmtpPreset) {
     setHost(p.host);
@@ -101,9 +102,10 @@ export default function SmtpConfig({ config, onSave, onPasswordChange, onFullSav
       if (onFullSave) onFullSave(cfg, password);
       else            onSave(cfg);
       if (onPasswordChange) onPasswordChange(password);
-      alert('Configuración SMTP guardada (la contraseña solo se guarda en memoria)');
+      setSaveResult('ok');
+      setTimeout(() => setSaveResult(null), 3000);
     } catch {
-      alert('Error al guardar la configuración SMTP');
+      setSaveResult('error');
     } finally {
       setSaving(false);
     }
@@ -189,6 +191,19 @@ export default function SmtpConfig({ config, onSave, onPasswordChange, onFullSav
             <span className={testStatus === 'error' ? '' : 'hidden'}><XCircle size={16} className="flex-shrink-0" /></span>
             <span>{testStatus === 'loading' ? 'Probando conexión...' : testMessage}</span>
           </div>
+
+          {saveResult === 'ok' && (
+            <div className="flex items-center gap-2 p-3 rounded-lg text-sm border bg-green-50 text-green-700 border-green-200">
+              <CheckCircle size={16} className="flex-shrink-0" />
+              Configuración guardada. La contraseña solo se guarda en memoria.
+            </div>
+          )}
+          {saveResult === 'error' && (
+            <div className="flex items-center gap-2 p-3 rounded-lg text-sm border bg-red-50 text-red-700 border-red-200">
+              <XCircle size={16} className="flex-shrink-0" />
+              Error al guardar la configuración SMTP.
+            </div>
+          )}
 
           <div className="flex flex-wrap gap-3 pt-2">
             <button type="button" className="btn-secondary" onClick={testConnection}>
